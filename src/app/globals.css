@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-blue-900: #1e3a5f;
+  --color-blue-800: #2a4a73;
+  --color-blue-700: #365b88;
+  --color-gold-500: #d4a843;
+  --color-gold-400: #e0b958;
+  --color-gold-600: #c49a38;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2a4a73 50%, #1e3a5f 100%);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

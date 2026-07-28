@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String   @default("Admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Brand {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  logo      String?
+  createdAt DateTime @default(now())
+  models    Model[]
+  cars      Car[]
+}
+
+model Model {
+  id        String  @id @default(uuid())
+  name      String
+  slug      String
+  brandId   String
+  brand     Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  cars      Car[]
+
+  @@unique([name, brandId])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  type      String   @default("body_type")
+  icon      String?
+  createdAt DateTime @default(now())
+  cars      Car[]
+}
+
+model Car {
+  id           String   @id @default(uuid())
+  title        String
+  slug         String   @unique
+  description  String
+  price        Float
+  year         Int
+  mileage      Int
+  fuelType     String
+  transmission String
+  bodyType     String
+  color        String
+  engineSize   String?
+  seats        Int?
+  doors        Int?
+  images       String
+  category     String   @default("used")
+  featured     Boolean  @default(false)
+  status       String   @default("active")
+  views        Int      @default(0)
+  brandId      String
+  brand        Brand    @relation(fields: [brandId], references: [id])
+  modelId      String?
+  model        Model?   @relation(fields: [modelId], references: [id])
+  categoryId   String?
+  categoryRel  Category? @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  inquiries    Inquiry[]
+}
+
+model Inquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  carId     String?
+  car       Car?     @relation(fields: [carId], references: [id], onDelete: SetNull)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
