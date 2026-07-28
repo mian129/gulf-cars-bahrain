@@ -12,31 +12,46 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [urlInput, setUrlInput] = useState("");
+  const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     if (images.length + files.length > maxImages) {
-      alert(`Maximum ${maxImages} images allowed`);
+      setError(`Maximum ${maxImages} images allowed`);
       return;
     }
 
     setUploading(true);
+    setError("");
+
     try {
-      const formData = new FormData();
+      const newImages: string[] = [];
       for (const file of Array.from(files)) {
-        formData.append("images", file);
+        if (!file.type.startsWith("image/")) continue;
+        if (file.size > 5 * 1024 * 1024) {
+          setError(`${file.name} is too large (max 5MB)`);
+          continue;
+        }
+        const base64 = await fileToBase64(file);
+        newImages.push(base64);
       }
-
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-
-      if (data.urls) {
-        onChange([...images, ...data.urls]);
+      if (newImages.length > 0) {
+        onChange([...images, ...newImages]);
       }
     } catch {
-      alert("Upload failed. Try again.");
+      setError("Failed to process images. Try again.");
     }
+
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -63,7 +78,10 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
 
   return (
     <div className="space-y-4">
-      {/* Uploaded Images Preview */}
+      {error && (
+        <div className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm">{error}</div>
+      )}
+
       {images.length > 0 && (
         <div className="flex flex-wrap gap-3">
           {images.map((img, i) => (
@@ -116,7 +134,6 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
         </div>
       )}
 
-      {/* Upload Area */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -138,18 +155,17 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         {uploading ? (
-          <p className="text-blue-600 font-medium">Uploading...</p>
+          <p className="text-blue-600 font-medium">Processing...</p>
         ) : (
           <>
             <p className="text-gray-600 font-medium">Click or drag images here to upload</p>
             <p className="text-xs text-gray-400 mt-1">
-              JPG, PNG, WebP — Max {maxImages} images — {images.length}/{maxImages} used
+              JPG, PNG, WebP — Max 5MB each — {images.length}/{maxImages} used
             </p>
           </>
         )}
       </div>
 
-      {/* URL Input */}
       <div className="flex gap-2">
         <input
           type="text"
