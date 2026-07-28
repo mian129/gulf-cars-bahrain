@@ -1,38 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import sharp from "sharp";
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const files = formData.getAll("images") as File[];
+    const { images } = await request.json();
 
-    if (!files || files.length === 0) {
-      return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return NextResponse.json({ error: "No images provided" }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
+    const compressed: string[] = [];
 
-    const uploadedUrls: string[] = [];
+    for (const img of images) {
+      if (typeof img !== "string") continue;
 
-    for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
+      if (img.startsWith("http")) {
+        compressed.push(img);
+        continue;
+      }
 
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      if (!img.startsWith("data:image")) continue;
 
-      const ext = file.name.split(".").pop() || "jpg";
-      const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-      const filepath = path.join(uploadDir, filename);
+      const match = img.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (!match) continue;
 
-      await writeFile(filepath, buffer);
-      uploadedUrls.push(`/uploads/${filename}`);
+      const format = match[1] === "png" ? "png" : "jpeg";
+      const inputBuf = Buffer.from(match[2], "base64");
+
+      const outputBuf = await sharp(inputBuf)
+        .resize({ width: 1024, height: 768, fit: "inside", withoutEnlargement: true })
+        .jpeg({ quality: 70, mozjpeg: true })
+        .toBuffer();
+
+      compressed.push(`data:image/jpeg;base64,${outputBuf.toString("base64")}`);
     }
 
-    return NextResponse.json({ urls: uploadedUrls });
+    return NextResponse.json({ images: compressed });
   } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    console.error("Upload compression error:", error);
+    return NextResponse.json({ error: "Compression failed" }, { status: 500 });
   }
 }

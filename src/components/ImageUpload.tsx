@@ -21,8 +21,8 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
       const url = URL.createObjectURL(file);
       img.onload = () => {
         URL.revokeObjectURL(url);
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 900;
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 600;
         let { width, height } = img;
         if (width > MAX_WIDTH) {
           height = (height * MAX_WIDTH) / width;
@@ -38,7 +38,7 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
         const ctx = canvas.getContext("2d");
         if (!ctx) return reject(new Error("Canvas not supported"));
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", 0.75));
+        resolve(canvas.toDataURL("image/jpeg", 0.6));
       };
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load image")); };
       img.src = url;
