@@ -15,12 +15,33 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fileToBase64 = (file: File): Promise<string> => {
+  const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 900;
+        let { width, height } = img;
+        if (width > MAX_WIDTH) {
+          height = (height * MAX_WIDTH) / width;
+          width = MAX_WIDTH;
+        }
+        if (height > MAX_HEIGHT) {
+          width = (width * MAX_HEIGHT) / height;
+          height = MAX_HEIGHT;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas not supported"));
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.75));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load image")); };
+      img.src = url;
     });
   };
 
@@ -38,11 +59,11 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
       const newImages: string[] = [];
       for (const file of Array.from(files)) {
         if (!file.type.startsWith("image/")) continue;
-        if (file.size > 5 * 1024 * 1024) {
-          setError(`${file.name} is too large (max 5MB)`);
+        if (file.size > 10 * 1024 * 1024) {
+          setError(`${file.name} is too large (max 10MB)`);
           continue;
         }
-        const base64 = await fileToBase64(file);
+        const base64 = await compressImage(file);
         newImages.push(base64);
       }
       if (newImages.length > 0) {
@@ -160,7 +181,7 @@ export default function ImageUpload({ images, onChange, maxImages = 10 }: ImageU
           <>
             <p className="text-gray-600 font-medium">Click or drag images here to upload</p>
             <p className="text-xs text-gray-400 mt-1">
-              JPG, PNG, WebP — Max 5MB each — {images.length}/{maxImages} used
+              JPG, PNG, WebP — Max 10MB each (auto-compressed) — {images.length}/{maxImages} used
             </p>
           </>
         )}

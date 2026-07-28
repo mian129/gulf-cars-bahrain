@@ -5,6 +5,8 @@ import SearchBar from "@/components/SearchBar";
 import { CATEGORIES, PRICE_RANGES } from "@/data/constants";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 function getCategoryIcon(type: string) {
   const icons: Record<string, JSX.Element> = {
     sedan: (
@@ -114,7 +116,7 @@ export default async function HomePage() {
     where: { status: "active" },
     include: { brand: true, model: true },
     orderBy: { createdAt: "desc" },
-    take: 16,
+    take: 12,
   });
 
   return (
