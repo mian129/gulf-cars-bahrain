@@ -74,12 +74,6 @@ export default async function UsedCarsPage({
   if (maxPrice) where.price = { ...((where.price as Record<string, number>) || {}), lte: maxPrice };
   if (minPrice) where.price = { ...((where.price as Record<string, number>) || {}), gte: minPrice };
 
-  const orderBy: Record<string, string> =
-    sort === "price-low" ? { price: "asc" } :
-    sort === "price-high" ? { price: "desc" } :
-    sort === "year" ? { year: "desc" } :
-    { createdAt: "desc" };
-
   const limit = 12;
   const skip = (page - 1) * limit;
 
@@ -87,7 +81,13 @@ export default async function UsedCarsPage({
     prisma.car.findMany({
       where,
       include: { brand: true, model: true },
-      orderBy,
+      orderBy: [
+        { featured: "desc" },
+        ...(sort === "price-low" ? [{ price: "asc" as const }] :
+          sort === "price-high" ? [{ price: "desc" as const }] :
+          sort === "year" ? [{ year: "desc" as const }] :
+          [{ createdAt: "desc" as const }]),
+      ],
       skip,
       take: limit,
     }),

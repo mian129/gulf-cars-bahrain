@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
+import DeleteCarButton from "@/components/DeleteCarButton";
 
 export default async function AdminCarsPage({
   searchParams,
@@ -122,6 +123,7 @@ export default async function AdminCarsPage({
                       >
                         View
                       </a>
+                      <DeleteCarButton carId={car.id} carTitle={car.title} />
                     </div>
                   </td>
                 </tr>
