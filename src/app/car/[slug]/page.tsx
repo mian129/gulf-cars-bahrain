@@ -53,16 +53,32 @@ export default async function CarDetailPage({
     { label: "Fuel Type", value: car.fuelType },
     { label: "Transmission", value: car.transmission },
     { label: "Body Type", value: car.bodyType },
-    { label: "Color", value: car.color },
+    { label: "Exterior Color", value: car.color },
+    ...(car.interiorColor ? [{ label: "Interior Color", value: car.interiorColor }] : []),
     ...(car.engineSize ? [{ label: "Engine", value: car.engineSize }] : []),
+    ...(car.horsepower ? [{ label: "Horsepower", value: car.horsepower }] : []),
+    ...(car.drivetrain ? [{ label: "Drivetrain", value: car.drivetrain }] : []),
     ...(car.seats ? [{ label: "Seats", value: car.seats.toString() }] : []),
     ...(car.doors ? [{ label: "Doors", value: car.doors.toString() }] : []),
+    ...(car.condition ? [{ label: "Condition", value: car.condition }] : []),
+    ...(car.numberOfOwners ? [{ label: "Previous Owners", value: car.numberOfOwners.toString() }] : []),
+    ...(car.location ? [{ label: "Location", value: car.location }] : []),
+    ...(car.vin ? [{ label: "VIN", value: car.vin }] : []),
   ];
 
-  const whatsappUrl = `https://wa.me/97300000000?text=Hi, I am interested in ${car.title} listed at BHD ${formatPrice(car.price)}`;
+  const features = [
+    car.accidentFree ? "Accident Free" : null,
+    car.warranty ? "Warranty Included" : null,
+    car.serviceHistory ? "Service History" : null,
+    car.negotiable ? "Price Negotiable" : null,
+  ].filter(Boolean);
+
+  const phoneNum = car.phone || "97300000000";
+  const whatsappNum = car.whatsapp || car.phone || "97300000000";
+  const whatsappUrl = `https://wa.me/${whatsappNum.replace(/[^0-9]/g, "")}?text=Hi, I am interested in ${car.title} listed at BHD ${formatPrice(car.price)}`;
   const emailSubject = encodeURIComponent(`Inquiry about ${car.title}`);
   const emailBody = encodeURIComponent(`Hi, I am interested in ${car.title} listed at BHD ${formatPrice(car.price)}. Please provide more details.`);
-  const smsUrl = `sms:+97300000000?body=Hi, I am interested in ${car.title} listed at BHD ${formatPrice(car.price)}`;
+  const smsUrl = `sms:${phoneNum}?body=Hi, I am interested in ${car.title} listed at BHD ${formatPrice(car.price)}`;
 
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -126,6 +142,18 @@ export default async function CarDetailPage({
                 <span className="text-sm text-gray-500">{car.views} views</span>
               </div>
               <p className="text-sm text-gray-500 mt-1">Listed on {new Date(car.createdAt).toLocaleDateString("en-BH")}</p>
+              {car.negotiable && (
+                <span className="inline-block mt-2 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded">Price Negotiable</span>
+              )}
+              {features.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {features.map((f) => (
+                    <span key={f} className="text-xs font-medium bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">
+                      {f === "Accident Free" && "✓ "}{f === "Warranty Included" && "✓ "}{f === "Service History" && "✓ "}{f}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Specifications */}
@@ -169,13 +197,13 @@ export default async function CarDetailPage({
                 </a>
 
                 <a
-                  href="tel:+97300000000"
+                  href={`tel:${phoneNum}`}
                   className="flex items-center justify-center w-full bg-blue-900 text-white py-3 rounded-lg font-semibold hover:bg-blue-800 transition-colors"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  Call: +973 XXXX XXXX
+                  Call: {car.phone || "+973 XXXX XXXX"}
                 </a>
 
                 <a

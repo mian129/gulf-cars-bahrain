@@ -48,34 +48,47 @@ model Category {
 }
 
 model Car {
-  id           String   @id @default(uuid())
-  title        String
-  slug         String   @unique
-  description  String
-  price        Float
-  year         Int
-  mileage      Int
-  fuelType     String
-  transmission String
-  bodyType     String
-  color        String
-  engineSize   String?
-  seats        Int?
-  doors        Int?
-  images       String
-  category     String   @default("used")
-  featured     Boolean  @default(false)
-  status       String   @default("active")
-  views        Int      @default(0)
-  brandId      String
-  brand        Brand    @relation(fields: [brandId], references: [id])
-  modelId      String?
-  model        Model?   @relation(fields: [modelId], references: [id])
-  categoryId   String?
-  categoryRel  Category? @relation(fields: [categoryId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  inquiries    Inquiry[]
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  description     String
+  price           Float
+  year            Int
+  mileage         Int
+  fuelType        String
+  transmission    String
+  bodyType        String
+  color           String
+  engineSize      String?
+  seats           Int?
+  doors           Int?
+  images          String
+  category        String   @default("used")
+  featured        Boolean  @default(false)
+  status          String   @default("active")
+  views           Int      @default(0)
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id])
+  modelId         String?
+  model           Model?   @relation(fields: [modelId], references: [id])
+  categoryId      String?
+  categoryRel     Category? @relation(fields: [categoryId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  inquiries       Inquiry[]
+  phone           String?
+  whatsapp        String?
+  location        String?
+  drivetrain      String?
+  interiorColor   String?
+  condition       String?
+  accidentFree    Boolean  @default(false)
+  warranty        Boolean  @default(false)
+  serviceHistory  Boolean  @default(false)
+  negotiable      Boolean  @default(false)
+  horsepower      String?
+  numberOfOwners  Int?
+  vin             String?
 }
 
 model Inquiry {
