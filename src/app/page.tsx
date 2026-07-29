@@ -4,6 +4,7 @@ import BrandGrid from "@/components/BrandGrid";
 import SearchBar from "@/components/SearchBar";
 import { CATEGORIES, PRICE_RANGES } from "@/data/constants";
 import { prisma } from "@/lib/db";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -112,6 +113,7 @@ function getCategoryIcon(type: string) {
 }
 
 export default async function HomePage() {
+  noStore();
   const newCars = await prisma.car.findMany({
     where: { status: "active" },
     include: { brand: true, model: true },
