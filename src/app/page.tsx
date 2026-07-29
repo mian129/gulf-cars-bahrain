@@ -1,7 +1,7 @@
 import Link from "next/link";
-import CarCard from "@/components/CarCard";
 import BrandGrid from "@/components/BrandGrid";
 import SearchBar from "@/components/SearchBar";
+import LiveListings from "@/components/LiveListings";
 import { CATEGORIES, PRICE_RANGES } from "@/data/constants";
 import { prisma } from "@/lib/db";
 import { unstable_noStore as noStore } from "next/cache";
@@ -164,24 +164,7 @@ export default async function HomePage() {
 
       {/* New Listings */}
       {newCars.length > 0 && (
-        <section className="py-12 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">New Listings</h2>
-              <Link href="/used-cars" className="text-blue-900 hover:text-blue-700 font-semibold text-sm flex items-center">
-                View All
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {newCars.map((car) => (
-                <CarCard key={car.id} car={car} />
-              ))}
-            </div>
-          </div>
-        </section>
+        <LiveListings initialCars={newCars as never} />
       )}
 
       {/* Browse by Price */}
